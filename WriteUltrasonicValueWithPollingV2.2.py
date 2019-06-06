@@ -5,6 +5,22 @@ from time import sleep
 import requests,json # packages for Thingworx POST & GET
 import sys,select,termios # packages for Keyboard Inputs
 
+# Operating Instructions
+instructions = """----------------
+ KEY    COMMAND
+----------------
+ w      Forward
+ s      Backward
+ a      Left
+ d      Right
+ space  Stop
+ o      Faster
+ l      Slower
+ b      Beep
+ q      Quit
+NOTE: Do not hold down the keys
+"""
+
 # Define settings for Ultrasonic Sensor
 us = ev3.UltrasonicSensor() # Connect ultrasonic sensor to any sensor port
 us.mode='US-DIST-CM' # Put the US sensor into distance mode.
@@ -128,7 +144,7 @@ def Run():
     direc = 'stop'
     obstruction = False
     print("-----------Connection Initiated-----------")
-    ev3.Sound.speak('E V 3 Ready').wait()
+    # ev3.Sound.speak('E V 3 Ready').wait() 
     with KeyPoller() as keyPoller:
         while True:
             distance = getDist()
@@ -174,15 +190,5 @@ def Run():
             # thingworxGET('cone',distance) #Uncomment for Debugging, Slows Code
 
 if __name__ == '__main__':
-    print("""Commands:
- Key   | Command
- w     | Forward
- s     | Backward
- a     | Left
- d     | Right
- space | Stop
- o     | Faster
- l     | Slower
- b     | Beep
- q     | Quit""")
+    print(instructions)
     Run()

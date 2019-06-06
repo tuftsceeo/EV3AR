@@ -1,4 +1,4 @@
-# Dive an EV3 while projecting the data collected by and Ultrasonic sensor in AR (powered by Vuforia Studio)
+# Dive an EV3 while projecting the data collected by an Ultrasonic sensor in AR (powered by Vuforia Studio)
 
 ## Designed by Daniel McGinn in Summer 2019 at the Tufts CEEO
 

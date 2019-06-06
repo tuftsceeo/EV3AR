@@ -22,7 +22,7 @@ headers = {
         }
 propName ="cone"
 
-# Record Keyboard Inputs with Polling
+# Record Keyboard Inputs with Polling Refactored from https://stackoverflow.com/questions/13207678/whats-the-simplest-way-of-detecting-keyboard-input-in-python-from-the-terminal
 isWindows = False
 try:
     from win32api import STD_INPUT_HANDLE

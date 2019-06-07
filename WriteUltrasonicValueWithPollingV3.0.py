@@ -106,7 +106,7 @@ def setSpeed(action):
     global speed
     if action == 'fast' and speed < 100:
         speed = speed+5
-    elif action == 'slow' and speed >= 0:
+    elif action == 'slow' and speed > 0:
         speed = speed-5
     return speed
 def drive(direc,speed,obstruction):

@@ -14,4 +14,7 @@ The required packages are:
 
 To get the MAC address & IP Address use ```sudo ifconfig```
 
-The Vuforia AR Experience is designed separately
+
+* The **Vuforia** directory contains the QR Code, Thingmark, and Vuforia Studio Files
+* The **Thingworx** directory contains python scripts to perform GET and POST Requests from Thingworx for a string or float
+* The **KeyboardInputs** directory contains python scripts to record keyboard inputs 

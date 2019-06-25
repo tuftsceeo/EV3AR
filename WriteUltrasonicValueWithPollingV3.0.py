@@ -35,9 +35,11 @@ motor_right = ev3.LargeMotor('outC')
 speed = 25 # Set Speed
 
 # Thingworx info
+with open('appkey.txt', 'r') as file:
+    appkey = file.read()
 url = "http://pp-1804271345f2.portal.ptc.io:8080/Thingworx/Things/CEEO_Summer_2019/Properties/"
 headers = {
-        'appKey': "f76e9513-0bbc-4b33-af7f-09e5ea959504",
+        'appKey': appkey,
         'Accept': "application/json",
         'Content-Type': "application/json"
         }

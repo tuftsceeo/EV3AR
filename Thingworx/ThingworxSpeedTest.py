@@ -31,4 +31,4 @@ t2 = time.time()
 PUT_time = t1-t0
 GET_time = t2-t1
 
-print('PUT_time:%f seconds\nGET_time:%f seconds' % (PUT_time,GET_time))
+print('PUT_time: %f seconds\nGET_time: %f seconds' % (PUT_time,GET_time))

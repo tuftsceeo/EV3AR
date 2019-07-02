@@ -1,4 +1,4 @@
-# Webserver For Driving an EV3 while projecting the data collected by an Ultrasonic sensor in AR (powered by Vuforia Studio)
+# EV3 AR Webserver
 
 ## Designed by Dan McGinn in Summer 2019 at the Tufts CEEO
 

@@ -4,13 +4,19 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer # package for Webserver
 from urllib.parse import unquote # package for decoding UTF-8
 import getpass, sys, socket, os, webbrowser
-import paramiko # package for establishing SSH connection
 from time import sleep
 import requests,json # packages for Thingworx POST & GET
 import sys,select,termios # packages for Keyboard Inputs
+import ev3dev.ev3 as ev3 # package for EV3 Commands
+
+pageContent = open('ARDemo.html').read()%('')
 
 # Read Demo Page
-pageContent = open('ARDemo.html').read()
+def setPageContent(distance):
+    global pageContent
+    DistStr = 'Distance to Obstruction:'+str(distance)
+    pageContent = open('ARDemo.html').read()%(DistStr)
+    return pageContent
 
 # Get IP Address
 ip_address = '';
@@ -23,16 +29,15 @@ s.close()
 host_port = 8000
 
 # Thingworx info
-def initThingworx():
-    with open('appkey.txt', 'r') as file:
-        appkey = file.read()
-    url = "http://pp-1804271345f2.portal.ptc.io:8080/Thingworx/Things/CEEO_Summer_2019/Properties/"
-    headers = {
-            'appKey': appkey,
-            'Accept': "application/json",
-            'Content-Type': "application/json"
-            }
-    propName ="cone"
+with open('appkey.txt', 'r') as file:
+    appkey = file.read()
+url = "http://pp-1804271345f2.portal.ptc.io:8080/Thingworx/Things/CEEO_Summer_2019/Properties/"
+headers = {
+        'appKey': appkey,
+        'Accept': "application/json",
+        'Content-Type': "application/json"
+        }
+propName ="cone"
 
 # Post property value to thingworx
 def thingworxPOST(propName,value):
@@ -51,11 +56,9 @@ def thingworxGET(propName,value):
         print('Property Value Not Updated')
 
 # Define motor outputs
-def initMotorControl():
-    import ev3dev.ev3 as ev3 # package for EV3 Commands
-    motor_left = ev3.LargeMotor('outB')
-    motor_right = ev3.LargeMotor('outC')
-    speed = 25 # Set Speed
+motor_left = ev3.LargeMotor('outB')
+motor_right = ev3.LargeMotor('outC')
+speed = 25 # Set Speed
 
 # Motor commands
 def forward():
@@ -74,6 +77,29 @@ def stop():
    motor_left.run_direct( duty_cycle_sp=0)
    motor_right.run_direct( duty_cycle_sp=-0)
 
+# Define settings for Ultrasonic Sensor
+us = ev3.UltrasonicSensor() # Connect ultrasonic sensor to any sensor port
+us.mode='US-DIST-CM' # Put the US sensor into distance mode.
+units = us.units # reports 'cm' even though the sensor measures 'mm'
+
+# Get distance from Ultrasonic Sensor
+def getDist():
+    return us.value()/10  # convert mm to cm
+
+# LED commands
+def red():
+    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
+    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
+def orange():
+    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.ORANGE)
+    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.ORANGE)
+def yellow():
+    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.YELLOW)
+    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.YELLOW)
+def green():
+    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.GREEN)
+    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.GREEN)
+
 # Webserver
 class MyServer(BaseHTTPRequestHandler):
 
@@ -89,10 +115,12 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        global pageContent
         self.do_HEAD(pageContent)
         self.wfile.write(pageContent.encode("utf-8"))
 
     def do_POST(self):
+        global pageContent
         content_length = int(self.headers['Content-Length'])  # Get the size of data
         post_data = self.rfile.read(content_length).decode('utf-8')  # Get the data
         print(post_data)
@@ -106,7 +134,12 @@ class MyServer(BaseHTTPRequestHandler):
             back()
         if 'Stop' in post_data:
             stop()
+        distance = getDist()
+        setPageContent(distance)
+        thingworxPOST('cone',distance)
+        # thingworxGET('cone',distance) #Uncomment for Debugging, Slows Code
         self._redirect('/')  # Redirect back to the root url
+        return pageContent
 
 # Create Webserver
 if __name__ == '__main__':
@@ -114,8 +147,6 @@ if __name__ == '__main__':
     print("Server Starts - %s:%s" % (ip_address, host_port))
 
     try:
-        initMotorControl()
-        initThingworx()
         http_server.serve_forever()
     except KeyboardInterrupt:
         http_server.server_close()

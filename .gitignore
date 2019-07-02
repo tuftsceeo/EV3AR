@@ -176,3 +176,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 appkey.txt
+
+# Studio Directory
+Studio/

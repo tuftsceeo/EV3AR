@@ -12,7 +12,7 @@ import ev3dev.ev3 as ev3 # package for EV3 Commands
 # Define motor outputs
 motor_left = ev3.LargeMotor('outB')
 motor_right = ev3.LargeMotor('outC')
-speed = 50 # Set Speed
+speed = 20 # Set Speed
 direc = 'Stop'
 
 pageContent = open('ARDemo.html').read()%('50','')+open('styleSheet.html').read()

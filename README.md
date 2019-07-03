@@ -19,3 +19,6 @@ To get the MAC address & IP Address use ```sudo ifconfig```
 * The **Vuforia** directory contains the QR Code, Thingmark, and Vuforia Studio Files
 * The **Thingworx** directory contains python scripts to perform GET and POST Requests from Thingworx for a string or float
 * The **KeyboardInputs** directory contains python scripts to record keyboard inputs 
+* The **Webserver** directory contains python scripts to serve a webpage that can be used to contol the movement of the ev3 and to display data collected by the ev3 sensors in AR 
+
+![alt text](https://github.com/tuftsceeo/EV3AR/blob/master/Webserver/EV3ARDemoSite.png?raw=true)

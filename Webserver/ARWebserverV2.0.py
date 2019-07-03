@@ -9,13 +9,19 @@ import requests,json # packages for Thingworx POST & GET
 import sys,select,termios # packages for Keyboard Inputs
 import ev3dev.ev3 as ev3 # package for EV3 Commands
 
-pageContent = open('ARDemo.html').read()%('')
+# Define motor outputs
+motor_left = ev3.LargeMotor('outB')
+motor_right = ev3.LargeMotor('outC')
+speed = 50 # Set Speed
+direc = 'Stop'
+
+pageContent = open('ARDemo.html').read()%('50','')+open('styleSheet.html').read()
 
 # Read Demo Page
-def setPageContent(distance):
+def setPageContent(distance,speed):
     global pageContent
     DistStr = 'Distance to Obstruction:'+str(distance)
-    pageContent = open('ARDemo.html').read()%(DistStr)
+    pageContent = open('ARDemo.html').read()%(str(speed),DistStr)+open('styleSheet.html').read()
     return pageContent
 
 # Get IP Address
@@ -55,27 +61,39 @@ def thingworxGET(propName,value):
     else:
         print('Property Value Not Updated')
 
-# Define motor outputs
-motor_left = ev3.LargeMotor('outB')
-motor_right = ev3.LargeMotor('outC')
-speed = 25 # Set Speed
-
 # Motor commands
-def forward():
+def forward(speed):
    motor_left.run_direct(duty_cycle_sp=speed)
    motor_right.run_direct(duty_cycle_sp=speed)
-def left():
+def left(speed):
    motor_left.run_direct( duty_cycle_sp=-speed)
    motor_right.run_direct( duty_cycle_sp=speed)
-def right():
+def right(speed):
    motor_left.run_direct( duty_cycle_sp=speed)
    motor_right.run_direct( duty_cycle_sp=-speed)
-def back():
+def back(speed):
    motor_left.run_direct(duty_cycle_sp=-speed)
    motor_right.run_direct(duty_cycle_sp=-speed)
-def stop():
+def stop(speed):
    motor_left.run_direct( duty_cycle_sp=0)
    motor_right.run_direct( duty_cycle_sp=-0)
+
+def setSpeed(NewSpeed):
+   global speed
+   speed = int(NewSpeed)
+   return speed
+
+def drive(direc,speed):
+    if direc == 'Forward':
+        forward(speed)
+    elif direc == 'Backward':
+        back(speed)
+    elif direc == 'Left':
+        left(speed)
+    elif direc == 'Right':
+        right(speed)
+    elif direc == 'Stop':
+        stop(speed)
 
 # Define settings for Ultrasonic Sensor
 us = ev3.UltrasonicSensor() # Connect ultrasonic sensor to any sensor port
@@ -87,18 +105,15 @@ def getDist():
     return us.value()/10  # convert mm to cm
 
 # LED commands
-def red():
-    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
-    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
-def orange():
-    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.ORANGE)
-    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.ORANGE)
-def yellow():
-    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.YELLOW)
-    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.YELLOW)
 def green():
     ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.GREEN)
     ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.GREEN)
+def yellow():
+    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.YELLOW)
+    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.YELLOW)
+def red():
+    ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.RED)
+    ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
 
 # Webserver
 class MyServer(BaseHTTPRequestHandler):
@@ -120,26 +135,35 @@ class MyServer(BaseHTTPRequestHandler):
         self.wfile.write(pageContent.encode("utf-8"))
 
     def do_POST(self):
-        global pageContent
+        global pageContent, speed, direc
         content_length = int(self.headers['Content-Length'])  # Get the size of data
         post_data = self.rfile.read(content_length).decode('utf-8')  # Get the data
         print(post_data)
         if 'Fwd' in post_data:
-            forward()
+            direc = 'Forward'
         if 'Left' in post_data:
-            left()
+            direc = 'Left'
         if 'Right' in post_data:
-            right()
+            direc = 'Right'
         if 'Bkwd' in post_data:
-            back()
+            direc = 'Backward'
         if 'Stop' in post_data:
-            stop()
+            direc = 'Stop'
+        if 'Speed' in post_data:
+            setSpeed(post_data.split("=")[1])
+        if 'Green' in post_data:
+            green()
+        if 'Yellow' in post_data:
+            yellow()
+        if 'Red' in post_data:
+            red()
+        drive(direc,int(speed))
         distance = getDist()
-        setPageContent(distance)
+        setPageContent(distance,speed)
         thingworxPOST('cone',distance)
         # thingworxGET('cone',distance) #Uncomment for Debugging, Slows Code
         self._redirect('/')  # Redirect back to the root url
-        return pageContent
+        return pageContent, speed, direc
 
 # Create Webserver
 if __name__ == '__main__':
